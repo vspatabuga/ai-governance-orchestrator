@@ -1,0 +1,78 @@
+version: '3.8'
+
+networks:
+  ingress_net:
+    driver: bridge
+  orchestration_net:
+    internal: true
+  intelligence_net:
+    internal: true
+  governance_net:
+    internal: true
+
+services:
+  gateway:
+    image: nginx:alpine
+    container_name: vsp_gateway
+    ports:
+      - "8080:80"
+      - "5678:5678"
+      - "6006:6006"
+    networks:
+      - ingress_net
+      - orchestration_net
+      - governance_net
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: vsp_n8n
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - WEBHOOK_URL=http://localhost:5678/
+      - ORCHESTRATOR_API=http://openclaw_agent:8000
+    networks:
+      - orchestration_net
+
+  openclaw_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vsp_openclaw
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - VECTOR_DB_URL=http://vectordb:6333
+      - PHOENIX_COLLECTOR_ENDPOINT=http://phoenix:4317/v1/traces
+    networks:
+      - orchestration_net
+      - intelligence_net
+      - governance_net
+    depends_on:
+      - ollama
+      - phoenix
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: vsp_ollama
+    networks:
+      - intelligence_net
+    volumes:
+      - ollama_data:/root/.ollama
+
+  vectordb:
+    image: qdrant/qdrant:latest
+    container_name: vsp_vectordb
+    networks:
+      - intelligence_net
+
+  phoenix:
+    image: arizeai/phoenix:latest
+    container_name: vsp_phoenix
+    environment:
+      - PHOENIX_PORT=6006
+    networks:
+      - governance_net
+      - ingress_net
+
+volumes:
+  ollama_data:

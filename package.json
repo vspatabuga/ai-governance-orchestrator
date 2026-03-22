@@ -1,0 +1,39 @@
+{
+  "name": "@vspatabuga/porto-ai-gov",
+  "version": "1.0.0",
+  "description": "VSP AI Governance Simulation - Private AI Orchestration Stack",
+  "type": "module",
+  "main": "simulate.sh",
+  "bin": {
+    "vsp-porto-ai-gov": "./simulate.sh"
+  },
+  "scripts": {
+    "simulate": "bash simulate.sh",
+    "start": "bash simulate.sh",
+    "stop": "docker compose -p vsp-ai-gov down",
+    "clean": "docker compose -p vsp-ai-gov down -v"
+  },
+  "keywords": [
+    "vsp",
+    "ai-governance",
+    "simulation",
+    "sovereign-systems",
+    "ollama",
+    "llamaindex"
+  ],
+  "author": "VSP (Virgiawan Sagarmata Patabuga)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vspatabuga/ai-governance-orchestrator.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "simulate.sh",
+    "docker-compose.yml",
+    "Dockerfile",
+    "src/"
+  ]
+}
