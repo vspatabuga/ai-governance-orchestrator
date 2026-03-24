@@ -116,7 +116,6 @@ docker compose -p vsp-${PACKAGE_NAME} up -d --build
 
 # Wait for services to be ready
 echo -e "${YELLOW}>> Waiting for services to be ready...${NC}"
-echo -e "${YELLOW}>> This may take a few minutes for Ollama to download models...${NC}"
 
 MAX_WAIT=300
 COUNTER=0
@@ -141,6 +140,16 @@ wait_for_service() {
 
 wait_for_service "http://localhost:${PHOENIX_PORT}" "Phoenix Dashboard" || true
 wait_for_service "http://localhost:${N8N_PORT}" "n8n Workflow" || true
+
+# Pull smallest LLM model for AI agent (phi:2.7b is ~1.6GB, efficient for demo)
+echo -e "${YELLOW}>> Pulling smallest LLM model (phi:2.7b - ~1.6GB)...${NC}"
+echo -e "${YELLOW}>> This is a one-time download for the simulation.${NC}"
+
+if docker exec vsp_ollama ollama pull phi:2.7b 2>/dev/null; then
+    echo -e "${GREEN}✓\${NC} LLM model ready"
+else
+    echo -e "${YELLOW}⚠ LLM model pull skipped (or already exists)${NC}"
+fi
 
 # Auto-open browser
 if [ "$AUTO_OPEN" = true ]; then
